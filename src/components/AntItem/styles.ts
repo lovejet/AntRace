@@ -9,6 +9,9 @@ export default StyleSheet.create({
     padding: 10,
     position: 'relative',
   },
+  itemLoser: {
+    opacity: 0.3,
+  },
   itemTitle: {
     fontSize: 16,
   },
@@ -16,6 +19,11 @@ export default StyleSheet.create({
     position: 'absolute',
     right: 5,
     top: 5,
+  },
+  itemWin: {
+    position: 'absolute',
+    right: 50,
+    top: 10,
   },
   itemStateContainer: {
     display: 'flex',

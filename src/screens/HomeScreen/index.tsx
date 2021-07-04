@@ -29,8 +29,7 @@ const state2ButtonText = (s: string) => {
 const HomeScreen = () => {
   const [ants, setAnts] = useStateWithCallbackLazy<AntExpand[]>([]);
   const [raceState, setRaceState] = useState<string>(ANT_STATE.NOT_YET_RUN);
-
-  console.log(ants);
+  const [winner, setWinner] = useState<number>(-1);
 
   const {data, loading, error} = useListEntriesQuery({
     variables: {},
@@ -39,8 +38,9 @@ const HomeScreen = () => {
   useEffect(() => {
     if (data?.ants) {
       setAnts(
-        data.ants.map((ant: Ant) => {
+        data.ants.map((ant: Ant, id: number) => {
           return {
+            id,
             ...ant,
             state: ANT_STATE.NOT_YET_RUN,
             odds: 0,
@@ -56,7 +56,9 @@ const HomeScreen = () => {
    *
    * @param item Ant item
    */
-  const renderItem = ({item}: {item: AntExpand}) => <AntItem item={item} />;
+  const renderItem = ({item}: {item: AntExpand}) => (
+    <AntItem item={item} winner={winner} />
+  );
 
   /**
    * AntWinLikelihoodCalculator
@@ -84,6 +86,7 @@ const HomeScreen = () => {
         };
       });
     }, null);
+    setWinner(-1);
   };
 
   /**
@@ -92,14 +95,25 @@ const HomeScreen = () => {
   const calculateOdds = (currentAnts: AntExpand[]) => {
     let calculatedCount = 0;
 
-    ants.forEach((ant: AntExpand, index: number) => {
+    currentAnts.forEach((ant: AntExpand, index: number) => {
       const callback = (likelihoodOfAntWinning: number) => {
         const newAnts = [...currentAnts];
         newAnts[index].odds = likelihoodOfAntWinning;
         newAnts[index].state = ANT_STATE.CALCULATED;
 
+        newAnts.sort((a, b) => b.odds - a.odds);
+
         calculatedCount++;
-        if (calculatedCount === ants.length) {
+        if (calculatedCount === currentAnts.length) {
+          let maxID = newAnts[0].id;
+          let maxOdds = newAnts[0].odds;
+          for (let i = 1; i < newAnts.length; i++) {
+            if (maxOdds < newAnts[i].odds) {
+              maxOdds = newAnts[i].odds;
+              maxID = newAnts[i].id;
+            }
+          }
+          setWinner(maxID);
           setRaceState(ANT_STATE.CALCULATED);
         }
 

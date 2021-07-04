@@ -4,7 +4,7 @@ import SVG, {Path, SvgProps} from 'react-native-svg';
 export default (props: SvgProps) => (
   <SVG
     {...props}
-    id="Layer_1"
+    id="ant-svg"
     x="0px"
     y="0px"
     width="100px"

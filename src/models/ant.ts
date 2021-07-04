@@ -6,6 +6,7 @@ export interface Ant {
 }
 
 export interface AntExpand {
+  id: number;
   name: string;
   color: string;
   length: number;
