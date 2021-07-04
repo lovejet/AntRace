@@ -3,7 +3,7 @@ import {Colors} from '../../themes';
 
 export default StyleSheet.create({
   itemContainer: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.background,
     margin: 5,
     borderRadius: 10,
     padding: 10,

@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import {FlatList} from 'react-native-gesture-handler';
 import {useStateWithCallbackLazy} from 'use-state-with-callback';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {Ant, AntExpand} from '../../models/ant';
 import styles from './styles';
@@ -26,13 +27,22 @@ const state2ButtonText = (s: string) => {
   }
 };
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}: any) => {
   const [ants, setAnts] = useStateWithCallbackLazy<AntExpand[]>([]);
   const [raceState, setRaceState] = useState<string>(ANT_STATE.NOT_YET_RUN);
   const [winner, setWinner] = useState<number>(-1);
+  const [username, setUserName] = useState('');
 
   const {data, loading, error} = useListEntriesQuery({
     variables: {},
+  });
+
+  useEffect(() => {
+    const getUserName = async () => {
+      const u = await AsyncStorage.getItem('ANTRACE_USERNAME');
+      setUserName(u || '');
+    };
+    getUserName();
   });
 
   useEffect(() => {
@@ -155,10 +165,23 @@ const HomeScreen = () => {
     }
   };
 
+  /**
+   * Log Out
+   */
+  const handleLogOut = async () => {
+    await AsyncStorage.setItem('ANTRACE_USERNAME', '');
+    navigation.navigate('LogIn');
+  };
+
   return (
     <View style={styles.pageContainer}>
       <SafeAreaView style={styles.container}>
-        <Text style={styles.title}>Lovejet Ant-Race</Text>
+        <View style={styles.topSection}>
+          <Text style={styles.title}>Hello {username}</Text>
+          <View style={styles.logout}>
+            <Button title="Logout" color={Colors.red} onPress={handleLogOut} />
+          </View>
+        </View>
         <View style={styles.listContainer}>
           {!error && loading && (
             <ActivityIndicator size="large" color={Colors.submit} />
