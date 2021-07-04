@@ -5,6 +5,8 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Button,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 import {FlatList} from 'react-native-gesture-handler';
 import {useStateWithCallbackLazy} from 'use-state-with-callback';
@@ -32,7 +34,8 @@ const HomeScreen = ({navigation}: any) => {
   const [ants, setAnts] = useStateWithCallbackLazy<AntExpand[]>([]);
   const [raceState, setRaceState] = useState<string>(ANT_STATE.NOT_YET_RUN);
   const [winner, setWinner] = useState<number>(-1);
-  const [username, setUserName] = useState('');
+  const [username, setUserName] = useState<string>('');
+  const [selectID, setSelectID] = useState<number>(-1);
 
   const {data, loading, error} = useListEntriesQuery({
     variables: {},
@@ -64,11 +67,22 @@ const HomeScreen = ({navigation}: any) => {
   }, [data]);
 
   /**
+   * Prediction Select
+   */
+  const handleSelect = (id: number) => {
+    setSelectID(id);
+  };
+
+  /**
    *
    * @param item Ant item
    */
   const renderItem = ({item}: {item: AntExpand}) => (
-    <AntItem item={item} winner={winner} />
+    <TouchableOpacity
+      disabled={winner !== -1}
+      onPress={() => handleSelect(item.id)}>
+      <AntItem item={item} winner={winner} selected={selectID === item.id} />
+    </TouchableOpacity>
   );
 
   /**
@@ -98,6 +112,7 @@ const HomeScreen = ({navigation}: any) => {
       });
     }, null);
     setWinner(-1);
+    setSelectID(-1);
   };
 
   /**
@@ -158,6 +173,10 @@ const HomeScreen = ({navigation}: any) => {
    */
   const handleButton = () => {
     if (raceState === ANT_STATE.NOT_YET_RUN) {
+      if (selectID === -1) {
+        Alert.alert('Warning', 'Please predict a winner.');
+        return;
+      }
       setRaceState(ANT_STATE.IN_PROGRESS);
       startCalculating();
     } else if (raceState === ANT_STATE.CALCULATED) {
@@ -173,6 +192,19 @@ const HomeScreen = ({navigation}: any) => {
     await AsyncStorage.setItem('ANTRACE_USERNAME', '');
     navigation.navigate('LogIn');
   };
+
+  /**
+   * Show message
+   */
+  useEffect(() => {
+    if (winner !== -1) {
+      if (winner === selectID) {
+        Alert.alert('You win!', 'Your prediction is right!');
+      } else {
+        Alert.alert('You failed!', 'Your prediction is wrong!');
+      }
+    }
+  }, [winner, selectID]);
 
   return (
     <View style={styles.pageContainer}>

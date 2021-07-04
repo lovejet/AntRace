@@ -47,4 +47,7 @@ export default StyleSheet.create({
   itemStateCalculated: {
     backgroundColor: 'blue',
   },
+  selected: {
+    backgroundColor: 'skyblue',
+  },
 });
