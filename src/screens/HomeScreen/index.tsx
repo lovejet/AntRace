@@ -7,6 +7,7 @@ import {
   Button,
 } from 'react-native';
 import {FlatList} from 'react-native-gesture-handler';
+import {useStateWithCallbackLazy} from 'use-state-with-callback';
 
 import {Ant, AntExpand} from '../../models/ant';
 import styles from './styles';
@@ -26,7 +27,7 @@ const state2ButtonText = (s: string) => {
 };
 
 const HomeScreen = () => {
-  const [ants, setAnts] = useState<AntExpand[]>([]);
+  const [ants, setAnts] = useStateWithCallbackLazy<AntExpand[]>([]);
   const [raceState, setRaceState] = useState<string>(ANT_STATE.NOT_YET_RUN);
 
   console.log(ants);
@@ -45,8 +46,10 @@ const HomeScreen = () => {
             odds: 0,
           };
         }),
+        null,
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   /**
@@ -80,40 +83,49 @@ const HomeScreen = () => {
           odds: 0,
         };
       });
-    });
+    }, null);
   };
 
   /**
-   * set all states of ants to IN_PROGRESS
+   * Calculate Odds
    */
-  const startCalculating = () => {
-    setAnts((prev: AntExpand[]) => {
-      return prev.map((ant: AntExpand) => {
-        return {
-          ...ant,
-          state: ANT_STATE.IN_PROGRESS,
-        };
-      });
-    });
-
+  const calculateOdds = (currentAnts: AntExpand[]) => {
     let calculatedCount = 0;
 
     ants.forEach((ant: AntExpand, index: number) => {
       const callback = (likelihoodOfAntWinning: number) => {
-        setAnts((prev: AntExpand[]) => {
-          prev[index].state = ANT_STATE.CALCULATED;
-          prev[index].odds = likelihoodOfAntWinning;
-
-          return prev;
-        });
+        const newAnts = [...currentAnts];
+        newAnts[index].odds = likelihoodOfAntWinning;
+        newAnts[index].state = ANT_STATE.CALCULATED;
 
         calculatedCount++;
         if (calculatedCount === ants.length) {
           setRaceState(ANT_STATE.CALCULATED);
         }
+
+        setAnts(newAnts, null);
       };
       generateAntWinLikelihoodCalculator()(callback);
     });
+  };
+
+  /**
+   * start calculating
+   */
+  const startCalculating = () => {
+    setAnts(
+      (prev: AntExpand[]) => {
+        return prev.map((ant: AntExpand) => {
+          return {
+            ...ant,
+            state: ANT_STATE.IN_PROGRESS,
+          };
+        });
+      },
+      (currentAnts: AntExpand[]) => {
+        calculateOdds(currentAnts);
+      },
+    );
   };
 
   /**
@@ -121,11 +133,11 @@ const HomeScreen = () => {
    */
   const handleButton = () => {
     if (raceState === ANT_STATE.NOT_YET_RUN) {
-      startCalculating();
       setRaceState(ANT_STATE.IN_PROGRESS);
+      startCalculating();
     } else if (raceState === ANT_STATE.CALCULATED) {
-      reset();
       setRaceState(ANT_STATE.NOT_YET_RUN);
+      reset();
     }
   };
 
