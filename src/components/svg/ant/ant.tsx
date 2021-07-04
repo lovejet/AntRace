@@ -7,8 +7,6 @@ export default (props: SvgProps) => (
     id="ant-svg"
     x="0px"
     y="0px"
-    width="100px"
-    height="100px"
     viewBox="0 0 100 100"
     enable-background="new 0 0 100 100">
     <Path

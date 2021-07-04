@@ -16,6 +16,7 @@ import {Colors} from '../../themes';
 import {useListEntriesQuery} from '../../services/graphql/ant';
 import AntItem from '../../components/AntItem';
 import {ANT_STATE} from '../../util/ant-state';
+import AnimatedAntList from '../../components/AnimatedAntList';
 
 const state2ButtonText = (s: string) => {
   if (s === ANT_STATE.NOT_YET_RUN) {
@@ -195,6 +196,7 @@ const HomeScreen = ({navigation}: any) => {
           )}
           {error && <Text style={styles.title}>{error.message}</Text>}
         </View>
+        <AnimatedAntList />
         {!error && !loading && (
           <Button
             title={state2ButtonText(raceState)}

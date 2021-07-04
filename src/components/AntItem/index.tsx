@@ -35,7 +35,7 @@ const AntItem = ({item, winner}: {item: AntExpand; winner: number}) => {
           {item.state !== ANT_STATE.CALCULATED ? '-' : item.odds.toFixed(2)}
         </Text>
         <View style={styles.itemImage}>
-          <AntSvg color={item.color.toLowerCase()} />
+          <AntSvg width={100} height={100} color={item.color.toLowerCase()} />
         </View>
         <View style={styles.itemStateContainer}>
           <Text style={[styles.itemState, state2Style(item.state)]}>

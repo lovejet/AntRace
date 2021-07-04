@@ -12,4 +12,5 @@ export default {
   grey: '#D6D9E0',
   submit: 'green',
   red: 'red',
+  blue: 'blue',
 };
